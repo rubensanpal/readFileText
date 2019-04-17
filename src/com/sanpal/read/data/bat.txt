@@ -1,0 +1,25 @@
+Rem ---
+Rem Script lancement batch PDMS
+Rem Ruben SANCHEZ - Developpeur
+Rem 2019
+@echo off
+Rem Lecture des variables d environement
+Rem ---
+set USERNAME=INFO_CLIENT_USER
+set USERPASSWORD=INFO_CLIENT_PASSWORD
+set PROJECTNAME=TDI
+set STARTPDMS=D:\ORANO\START\pdms12_1SP4_SGN.bat
+set PDMSUI=D:\AVEVA\Plant\PDMS12.1.SP4\PDMSUI
+Rem ---
+Rem Path de ou sont les macros
+Rem ---
+set INPUTMACRO=C:\Users\Administrator\AppData\Local\Temp\INFO_NAME_MACRO.mac
+set MDB=/APD-3D-ETUDE
+Rem ---
+Rem Path de ou sont les fichiers de sortie
+Rem ---
+set PDMSUSER=D:\Shares\Data\ORANO\REPORTER
+echo PDMSUSER set to %pdmsuser%
+Rem ---
+set PDMS_CONSOLE_IDENTIFIER=%RANDOM%
+call %STARTPDMS% TTY %PROJECTNAME% %USERNAME%/%USERPASSWORD% %MDB% $m/%INPUTMACRO%

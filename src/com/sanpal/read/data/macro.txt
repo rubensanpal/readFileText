@@ -1,0 +1,206 @@
+----------------------------------------------------------------------------------
+-- Macro: 				* extractDataSchema.mac 								 -
+-- Author:				* Ruben Sanpal				 							 -
+-- Contact e-mail:		*  	 							                         -
+-- Contact Phone:		* 													 	 -
+-- Last Modification:	* 2019      				 							 -
+-- Property:			*                       	 							 -
+----------------------------------------------------------------------------------
+-- File:				* dataWorld.csv					 						 -
+-- Module:				* DataBase					 							 -
+-- Version:				* 1.4_A						 							 -
+-- Description:			* Cette macro a comme objectif d''attraper toute la 	 -
+--						liste de members avec sont owner et sont attributes 	 -
+----------------------------------------------------------------------------------
+DESIGN
+$* Report (v1) D:\AVEVA\ORANO\ExtractDataSchema.mac created by user SANPAL
+------------------- Block of collect -------------------
+!world = object COLLECTION()
+!world.type('SITE')
+-- Array de tous element de type SITE de World
+!sitesAtWorld = !world.results()
+--
+$P Collec from World = ok
+------------------- Block members of WORLD -------------------
+!membersFromWorldWithType = Array()
+do !x from 1 to !sitesAtWorld.size() by 1
+	!membersFromWorldWithType.append(!sitesAtWorld[!x].type)
+enddo
+--
+!elementUniqueFromWorld = Array()
+!elementUniqueFromWorld.append(!sitesAtWorld[1])
+!sizeArrayOfSites = !membersFromWorldWithType.size()
+do !x from 1 to !sizeArrayOfSites by 1
+	!!number = 1
+	!increment = !x+!!number
+	BREAK if (!x EQ !sizeArrayOfSites)
+		if (!membersFromWorldWithType[!x] NEQ !membersFromWorldWithType[!increment]) then
+			!elementUniqueFromWorld.append(!sitesAtWorld[!x])
+		endif
+enddo
+--
+$P Identification Owner and Member from SITE = ok
+------------------- Block members of SITE -------------------
+!arrayMembersFromSITE = Array()
+!membersFromSITE = Array()
+do !x from 1 to !sitesAtWorld.size() by 1
+	!arrayMembersFromSITE.append(!sitesAtWorld[!x].mem)
+	do !j from 1 to !arrayMembersFromSITE[!x].size() by 1
+		!membersFromSITE.append(!arrayMembersFromSITE[!x][!j])
+	enddo
+enddo
+--
+!membersFromSITEWithType = Array()
+do !x from 1 to !membersFromSITEWithType.size() by 1
+	!membersFromSITEWithType.append(!membersFromSITE[!x].type)
+enddo
+--
+!elementUniqueFromSITE = Array()
+!elementUniqueFromSITE.append(!membersFromSITE[1])
+!sizeArrayOfZones = !membersFromSITEWithType.size()
+do !x from 1 to !sizeArrayOfZones by 1
+	!increment = !x+!!number
+	BREAK if (!x EQ !sizeArrayOfZones)
+		if (!membersFromSITEWithType[!x] NEQ !membersFromSITEWithType[!increment]) then
+			!elementUniqueFromSITE.append(!membersFromSITE[!x])
+		endif
+enddo
+$P Identification Owner and Member from ZONE = ok
+--
+------------------- Block members of ZONE -------------------
+!arrayMembersFromZONE = Array()
+!membersFromZONE = Array()
+do !x from 1 to !membersFromSITE.size() by 1
+	!arrayMembersFromZONE.append(!membersFromSITE[!x].mem)
+	do !j from 1 to !arrayMembersFromZONE[!x].size() by 1
+		!membersFromZONE.append(!arrayMembersFromZONE[!x][!j])
+	enddo
+enddo
+--
+!membersFromZONEWithType = Array()
+do !x from 1 to !membersFromZONE.size() by 1
+	!membersFromZONEWithType.append(!membersFromZONE[!x].type)
+enddo
+--
+!elementUniqueFromZONE = Array()
+!elementUniqueFromZONE.append(!membersFromZONE[1])
+!sizeArrayOfLevelA = !membersFromZONEWithType.size()
+do !x from 1 to !sizeArrayOfLevelA by 1
+	!increment = !x+!!number
+	BREAK if (!x EQ !sizeArrayOfLevelA)
+		if (!membersFromZONEWithType[!x] NEQ !membersFromZONEWithType[!increment]) then
+			!elementUniqueFromZONE.append(!membersFromZONE[!x])
+		endif
+enddo
+$P Identification Owner and Member from ZONE level 1 = ok
+--
+------------------- Block treatment of attributes for each member -------------------
+-- SITE
+!attributesSiteWithValue = Array()
+!attributesSiteWithTypeData = Array()
+!attributesSite = !elementUniqueFromWorld[1].attributes()
+	do !x from 1 to !attributesSite.size() by 1
+		!attributesSiteWithValue.append(!elementUniqueFromWorld[1].attributeName(!attributesSite[!x]))
+	enddo
+	do !x from 1 to !attributesSiteWithValue.size() by 1
+		!attributesSiteWithTypeData.append(!attributesSiteWithValue[!x].objectType())
+	enddo
+$P Identification all attributes from SITE members = ok
+-- ZONE
+!attributesZoneWithValue = Array()
+!attributesZoneWithTypeData = Array()
+!attributesZone = !elementUniqueFromSITE[1].attributes()
+	do !x from 1 to !attributesZone.size() by 1
+		!attributesZoneWithValue.append(!elementUniqueFromSITE[1].attributeName(!attributesZone[!x]))
+	enddo
+	do !x from 1 to !attributesZoneWithValue.size() by 1
+		!attributesZoneWithTypeData.append(!attributesZoneWithValue[!x].objectType())
+	enddo
+$P Identification all attributes from ZONE members = ok
+-- ZONE level 1
+!attributesZonelevel1 = Array()
+!attributesZonelevel1WithData = Array()
+!attributesZonelevel1WithTypeData = Array()
+!arraySizeattributesZonelevel1 = Array()
+do !i from 1 to !elementUniqueFromZONE.size() by 1
+	!attributesTemp = !elementUniqueFromZONE[!i].attributes()
+	!arraySizeattributesZonelevel1.append(!attributesTemp.size())
+	do !r from 1 to !attributesTemp.size() by 1
+		!attributesZonelevel1.append(!attributesTemp[!r])
+	enddo
+--
+	do !x from 1 to !attributesTemp.size() by 1
+		!attributesTempWhitValue = Array()
+		!attributesTempWhitValue.append(!elementUniqueFromZONE[!i].attributeName(!attributesTemp[!x]))
+		handle any
+			!attributesTempWhitValue.append('ATT dont have value')
+		endhandle
+		do !t from 1 to !attributesTempWhitValue.size() by 1
+			!attributesZonelevel1WithData.append(!attributesTempWhitValue[!t])
+		enddo
+	enddo
+	!attributesTemp.delete()
+	!attributesTempWhitValue.delete()
+enddo
+$P Size of array indentification typeData
+q var !attributesZonelevel1WithData.size()
+--
+do !x from 1 to !attributesZonelevel1WithData.size() by 1
+	!attributesZonelevel1WithTypeData.append(!attributesZonelevel1WithData[!x].objectType())
+enddo
+$P Identification all attributes from ZONE members level 1 = ok
+
+------------------- Block concatenate array to exportation TABLE 1 -------------------
+$P Star information processing for TABLE 1
+!dataSchemaWorld = array()
+!dataSchemaWorld.append('TYPE owner;TYPE member')
+!dataSchemaWorld.append(!elementUniqueFromWorld[1].owner.type&';'&!elementUniqueFromWorld[1].type)
+!dataSchemaWorld.append(!elementUniqueFromSITE[1].owner.type&';'&!elementUniqueFromSITE[1].type)
+do !x from 1 to !elementUniqueFromZONE.size() by 1
+!dataSchemaWorld.append(!elementUniqueFromZONE[!x].owner.type&';'&!elementUniqueFromZONE[!x].type)
+enddo
+!dataSchemaWorld.unique()
+$P Information processing for TABLE 1 = ok
+--
+------------------- Block concatenate array to exportation TABLE 2 -------------------
+$P Star information processing for TABLE 2
+!dataAttributsWorld = array()
+!dataAttributsWorld.append('NAME member;LIST ATTRIBUTES;TYPE format')
+do !x from 0 to !elementUniqueFromWorld.size() by 1
+	!increment = !x+!!number
+	BREAK if (!increment EQ 2)
+	do !j from 1 to !attributesSite.size() by 1
+		!dataAttributsWorld.append(!elementUniqueFromWorld[!increment].type&';'&!attributesSite[!j]&';'&!attributesSiteWithTypeData[!j])
+	enddo
+enddo
+do !x from 0 to !elementUniqueFromSITE.size() by 1
+	!increment = !x+!!number
+	BREAK if (!increment EQ 2)
+	do !j from 1 to !attributesZone.size() by 1
+		!dataAttributsWorld.append(!elementUniqueFromSITE[!increment].type&';'&!attributesZone[!j]&';'&!attributesZoneWithTypeData[!j])
+	enddo
+enddo
+!increment = 1
+!incrementControl = 0
+do !g from 1 to !attributesZonelevel1.size() by 1
+	!incrementControl = !incrementControl+!!number
+		if (!incrementControl EQ !arraySizeattributesZonelevel1[!increment]) then
+			!increment = !increment+!!number
+			!incrementControl = 0
+		endif
+		BREAK if (!increment EQ !elementUniqueFromZONE.size())
+	!dataAttributsWorld.append(!elementUniqueFromZONE[!increment].type&';'&!attributesZonelevel1[!g]&';'&!attributesZonelevel1WithTypeData[!g])
+enddo
+!dataAttributsWorld.unique()
+$P Information processing for TABLE 2 = ok
+--
+------------------- Block of export information -------------------
+$P Star of information extraction
+!fileExport = object file('D:\Shares\Data\ORANO\REPORTER\answer_MacroPDMS_test_Table1_MEM.csv')
+!fileExport.writefile('over',!dataSchemaWorld)
+!fileExport.close()
+!fileExport = object file('D:\Shares\Data\ORANO\REPORTER\answer_MacroPDMS_test_Table2_ATT.csv')
+!fileExport.writefile('over',!dataAttributsWorld)
+!fileExport.close()
+$P Information extraction = ok
+FINISH
